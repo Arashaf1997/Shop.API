@@ -10,24 +10,22 @@ namespace Infrastructure.Repositories
 {
     public class UnitOfWork : IUnitOfWork
     {
-        //public UnitOfWork(ICategoriesRepository categories, ITagsRepository tags, IOrdersRepository orders, IUsersRepository users, ICommentsRepository comments, IBonusesRepository bonuses, IProductsRepository products)
-        //{
-        //    Categories = categories;
-        //    Tags = tags;
-        //    Orders = orders;
-        //    Users = users;
-        //    Comments = comments;
-        //    Bonuses = bonuses;
-        //    Products = products;
-        //}
-        public UnitOfWork(IProductsRepository products)
+		//public UnitOfWork(ICategoriesRepository categories, ITagsRepository tags, IOrdersRepository orders, IUsersRepository users, ICommentsRepository comments, IBonusesRepository bonuses, IProductsRepository products)
+		//{
+		//	Categories = categories;
+		//	Tags = tags;
+		//	Orders = orders;
+		//	Users = users;
+		//	Comments = comments;
+		//	Bonuses = bonuses;
+		//	Products = products;
+		//}
+		public UnitOfWork(IProductsRepository products, IUsersRepository users)
         {
             Products = products;
-        }
-        public UnitOfWork (IUsersRepository users)
-        {
             Users = users;
         }
+
 
         public ICategoriesRepository Categories { get; }
 

@@ -7,9 +7,9 @@ namespace Shop.API
     {
         public static void AddApplication(this IServiceCollection service)
         {
-            service.AddTransient<IUnitOfWork, UnitOfWork>();
             service.AddTransient<IProductsRepository, ProductsRepository>();
             service.AddTransient<IUsersRepository, UsersRepository>();
+            service.AddTransient<IUnitOfWork, UnitOfWork>();
         }
     }
 }
