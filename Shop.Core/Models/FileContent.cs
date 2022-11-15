@@ -4,10 +4,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Dependencies.Models
 {
-    [Table("ProductDiscounts", Schema = "dbo")]
-    public class ProductDiscount : BaseModel
+    public class FileContent : BaseModel
     {
-        public ProductDiscount()
+        public FileContent()
         {
         }
         public int DiscountPercent { get; set; }

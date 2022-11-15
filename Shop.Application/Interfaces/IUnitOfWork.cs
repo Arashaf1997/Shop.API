@@ -14,5 +14,8 @@ namespace Application.Interfaces
         ICategoriesPropertiesRepository CategoriesProperties { get; }
         IColorsRepository Colors { get; }
         IPropertyValuesRepository PropertyValues { get; }
+        IDiscountsRepository Discounts { get; }
+        IFileContentsRepository FileContents { get; }
+        IBrandsRepository Brands { get; }
     }
 }

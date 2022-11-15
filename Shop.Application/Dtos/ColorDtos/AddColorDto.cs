@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Shop.Application.Dtos.ProductDtos
+namespace Shop.Application.Dtos.ColorDtos
 {
     public class AddColorDto
     {

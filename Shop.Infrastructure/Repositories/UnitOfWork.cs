@@ -24,34 +24,35 @@ namespace Infrastructure.Repositories
             IUsersRepository users,
             ICategoriesRepository categories, 
             ICategoriesPropertiesRepository categoriesProperties,
-            IPropertyValuesRepository propertyValues)
+            IPropertyValuesRepository propertyValues,
+            IDiscountsRepository discounts,
+            IBrandsRepository brands,
+            IFileContentsRepository fileContents)
         {
             Products = products;
             Users = users;
             Categories = categories;
             CategoriesProperties = categoriesProperties;
             PropertyValues = propertyValues;
+            Discounts = discounts;
+            Brands = brands;
+            FileContents = fileContents;
         }
 
 
         public ICategoriesRepository Categories { get; }
-
         public ITagsRepository Tags { get; }
-
         public IOrdersRepository Orders { get; }
-
         public IUsersRepository Users { get; }
-
         public ICommentsRepository Comments { get; }
-
         public IBonusesRepository Bonuses { get; }
-
         public IProductsRepository Products { get; }
-
         public ICategoriesPropertiesRepository CategoriesProperties { get; }
-
         public IColorsRepository Colors => throw new NotImplementedException();
-
         public IPropertyValuesRepository PropertyValues { get; }
+        public IDiscountsRepository Discounts { get; }
+        public IFileContentsRepository FileContents { get; }
+        public IBrandsRepository Brands { get; }
+
     }
 }
