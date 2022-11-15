@@ -9,6 +9,8 @@ namespace Application.Interfaces
     {
         Task<IReadOnlyList<GetProductDto>> GetAllPagedAsync(string order, int pageSize, int pageNumber);
 
+        Task<int> Add(AddProductDto addProductDto);
+
         //IQueryable<Product> GetFilteredProducts(string searchText, int? categoryId, int? userId);
         //IQueryable<GetProductDto> GetProducts(int? categoryId, int? subCategoryId, int pageSize, int pageNo, string order);
     }

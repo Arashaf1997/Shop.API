@@ -10,6 +10,7 @@ namespace Application.Interfaces
     {
         Task<IReadOnlyList<GetCategoryDto>> GetAllAsync();
         Task<int> UpdateAsync(UpdateCategoryDto updateCategoryDto);
+        Task<int> Add(string title);
 
         //IQueryable<Category> GetFilteredCategories(string searchText);
         //IQueryable<CategoryDto> GetAllCategories();

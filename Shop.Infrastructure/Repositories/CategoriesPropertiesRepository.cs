@@ -32,7 +32,7 @@ namespace Infrastructure.Repositories
                 connection.Open();
 
                 // Pass the product object and the SQL statement into the Execute function (async)
-                var result = await connection.ExecuteAsync(sql, new {CategoryId = addCategoryPropertyDto.CategoryId, Title = addCategoryPropertyDto.Title});
+                var result = await connection.ExecuteAsync(sql, new { CategoryId = addCategoryPropertyDto.CategoryId, Title = addCategoryPropertyDto.Title });
                 return result;
             }
         }
@@ -80,9 +80,12 @@ namespace Infrastructure.Repositories
             }
         }
 
-        public Task<List<GetCategoryPropertyDto>> GetCategoryProperties(int categoryId)
+        public async Task<List<GetCategoryPropertyDto>> GetCategoryProperties(int categoryId)
         {
-            throw new NotImplementedException();
+            var sql = "SELECT * FROM dbo.CategoriesProperties WHERE CategoryId = @CategoryId";
+            using var connection = new SqlConnection(_configuration.GetConnectionString("DapperConnection"));
+            var result = await connection.QueryAsync<GetCategoryPropertyDto>(sql, new { CategoryId = categoryId });
+            return result.ToList();
         }
 
         public async Task<int> UpdateAsync(UpdateCategoryPropertyDto dto)
@@ -91,7 +94,7 @@ namespace Infrastructure.Repositories
             using (var connection = new SqlConnection(_configuration.GetConnectionString("DapperConnection")))
             {
                 connection.Open();
-                var result = await connection.ExecuteAsync(sql, new { Title = dto.Title, Id = dto.Id});
+                var result = await connection.ExecuteAsync(sql, new { Title = dto.Title, Id = dto.Id });
                 return result;
             }
         }

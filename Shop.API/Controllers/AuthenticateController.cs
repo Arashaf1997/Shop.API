@@ -63,6 +63,12 @@ namespace JwtWebApiTutorial.Controllers
                 return BadRequest();
         }
 
+        [HttpGet("GetMe"), Authorize]
+        public ActionResult<string> GetMe()
+        {
+            var userName = _unitOfWork.Users.GetMe();
+            return Ok(userName);
+        }
         //[HttpPost("refresh-token")]
         //public async Task<ActionResult<string>> RefreshToken()
         //{
@@ -133,7 +139,7 @@ namespace JwtWebApiTutorial.Controllers
         //    return jwt;
         //}
 
-        
+
 
         //private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
         //{

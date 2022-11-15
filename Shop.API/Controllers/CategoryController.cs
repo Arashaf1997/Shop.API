@@ -1,5 +1,6 @@
 using Application.Interfaces;
 using Dependencies.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shop.Application.Dtos.CategoryDtos;
 using Shop.Application.Dtos.ProductDtos;
@@ -47,9 +48,9 @@ namespace Shop.API.Controllers
         /// <param name="product"></param>
         /// <returns>Status for creation</returns>
         [HttpPost]
-        public async Task<IActionResult> Add(Category product)
+        public async Task<IActionResult> Add(string title)
         {
-            var data = await _unitOfWork.Categories.AddAsync(product);
+            var data = await _unitOfWork.Categories.Add(title);
             return Ok(data);
         }
 

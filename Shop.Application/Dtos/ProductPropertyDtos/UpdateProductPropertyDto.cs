@@ -6,9 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Shop.Application.Dtos.PropertyValueDtos
+namespace Shop.Application.Dtos.ProductPropertyDtos
 {
-    public class UpdatePropertyValueDto
+    public class UpdateProductPropertyDto
     {
         public int Id{ get; set; }
         public string Title { get; set; }

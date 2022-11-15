@@ -19,25 +19,19 @@ namespace Infrastructure.Repositories
             _configuration = configuration;
         }
 
-        public async Task<int> AddAsync(Category entity)
+        public async Task<int> Add(string title)
         {
-            // Set the time to the current moment
-            entity.InsertTime = DateTime.Now;
-            entity.EditTime = null;
-
-
-            // Basic SQL statement to insert a product into the products table
-            var sql = "INSERT INTO dbo.Categories(Title,InsertTime,EditTime)VALUES(@Title,@InsertTime,@EditTime)";
+            var sql = "INSERT INTO dbo.Categories(Title,InsertTime,EditTime)VALUES(@Title,GETDATE(),NULL)";
 
             // Sing the Dapper Connection string we open a connection to the database
-            using (var connection = new SqlConnection(_configuration.GetConnectionString("DapperConnection")))
-            {
-                connection.Open();
+            using var connection = new SqlConnection(_configuration.GetConnectionString("DapperConnection"));
+            var result = await connection.ExecuteAsync(sql, new { Title = title });
+            return result;
+        }
 
-                // Pass the product object and the SQL statement into the Execute function (async)
-                var result = await connection.ExecuteAsync(sql, entity);
-                return result;
-            }
+        public Task<int> AddAsync(Category entity)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<int> DeleteAsync(int id)
@@ -85,7 +79,7 @@ namespace Infrastructure.Repositories
             using (var connection = new SqlConnection(_configuration.GetConnectionString("DapperConnection")))
             {
                 connection.Open();
-                var result = await connection.ExecuteAsync(sql, new { Title = entity.Title, Id = entity.Id});
+                var result = await connection.ExecuteAsync(sql, new { Title = entity.Title, Id = entity.Id });
                 return result;
             }
         }

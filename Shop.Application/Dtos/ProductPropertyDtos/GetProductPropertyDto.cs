@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Shop.Application.Dtos.PropertyValueDtos
+namespace Shop.Application.Dtos.ProductPropertyDtos
 {
-    public class GetPropertyValueDto
+    public class GetProductPropertyDto
     {
         public int PropertyValueId { get; set; }
         public string Value { get; set; }

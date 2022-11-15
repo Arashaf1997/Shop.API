@@ -13,6 +13,6 @@ namespace Application.Interfaces
         IBonusesRepository Bonuses { get; }
         ICategoriesPropertiesRepository CategoriesProperties { get; }
         IColorsRepository Colors { get; }
-        IPropertyValues PropertyValues { get; }
+        IPropertyValuesRepository PropertyValues { get; }
     }
 }

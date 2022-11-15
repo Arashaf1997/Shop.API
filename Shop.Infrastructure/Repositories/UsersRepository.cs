@@ -1,6 +1,7 @@
 ﻿using Application.Interfaces;
 using Dapper;
 using Dependencies.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Shop.Application.Dtos.UserDtos;
@@ -19,12 +20,13 @@ namespace Infrastructure.Repositories
     public class UsersRepository : IUsersRepository
     {
         private readonly IConfiguration _configuration;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-
-        public UsersRepository(IConfiguration configuration)
+        public UsersRepository(IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
         {
             // Injecting Iconfiguration to the contructor of the product repository
             _configuration = configuration;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public Task<int> AddAsync(User entity)
@@ -62,7 +64,7 @@ namespace Infrastructure.Repositories
 
                 if (VerifyPasswordHash(request.Password, result.PasswordHash, result.PasswordSalt))
                 {
-                    string token = CreateToken(user);
+                    string token = CreateToken(request);
                     return token;
                 }
                 else
@@ -72,7 +74,7 @@ namespace Infrastructure.Repositories
             }
         }
 
-        public  void Register(RegisterUserDto request)
+        public void Register(RegisterUserDto request)
         {
             User user = new User();
             CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
@@ -82,7 +84,7 @@ namespace Infrastructure.Repositories
             user.PasswordSalt = passwordSalt;
 
             var sql = @"INSERT INTO dbo.Users (UserName,Password,Token,EmailAddress,PhoneNumber,InBlog,InsertTime,EditTime,PasswordHash,PasswordSalt)
-VALUES (@Username,NULL,0,NULL,NULL,NULL,GETDATE(),NULL,@PasswordHash,@PasswordSalt)";
+VALUES (@Username,NULL,0,NULL,NULL,0,GETDATE(),NULL,@PasswordHash,@PasswordSalt)";
 
             // Sing the Dapper Connection string we open a connection to the database
             using (var connection = new SqlConnection(_configuration.GetConnectionString("DapperConnection")))
@@ -90,7 +92,7 @@ VALUES (@Username,NULL,0,NULL,NULL,NULL,GETDATE(),NULL,@PasswordHash,@PasswordSa
                 connection.Open();
 
                 // Pass the product object and the SQL statement into the Execute function (async)
-                 var res = connection.ExecuteAsync(sql, user);
+                 var res = connection.Execute(sql, user /*new {Username = user.Username, PassowrdHash = user.PasswordHash, PasswordSalt = user.PasswordSalt}*/);
             }
         }
 
@@ -115,7 +117,7 @@ VALUES (@Username,NULL,0,NULL,NULL,NULL,GETDATE(),NULL,@PasswordHash,@PasswordSa
                 return computedHash.SequenceEqual(passwordHash);
             }
         }
-        private string CreateToken(User user)
+        private string CreateToken(LoginUserDto user)
         {
             List<Claim> claims = new List<Claim>
             {
@@ -136,6 +138,16 @@ VALUES (@Username,NULL,0,NULL,NULL,NULL,GETDATE(),NULL,@PasswordHash,@PasswordSa
             var jwt = new JwtSecurityTokenHandler().WriteToken(token);
 
             return jwt;
+        }
+
+        public string GetMe()
+        {
+            var result = string.Empty;
+            if (_httpContextAccessor.HttpContext != null)
+            {
+                result = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.Name);
+            }
+            return result;
         }
     }
 }

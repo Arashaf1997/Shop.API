@@ -11,5 +11,6 @@ namespace Application.Interfaces
         //IQueryable<User> GetFilteredUsers(string searchText);
         void Register(RegisterUserDto request);
         string Login(LoginUserDto request);
+        string GetMe();
     }
 }

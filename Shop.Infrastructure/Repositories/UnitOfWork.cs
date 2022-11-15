@@ -10,20 +10,27 @@ namespace Infrastructure.Repositories
 {
     public class UnitOfWork : IUnitOfWork
     {
-		//public UnitOfWork(ICategoriesRepository categories, ITagsRepository tags, IOrdersRepository orders, IUsersRepository users, ICommentsRepository comments, IBonusesRepository bonuses, IProductsRepository products)
-		//{
-		//	Categories = categories;
-		//	Tags = tags;
-		//	Orders = orders;
-		//	Users = users;
-		//	Comments = comments;
-		//	Bonuses = bonuses;
-		//	Products = products;
-		//}
-		public UnitOfWork(IProductsRepository products, IUsersRepository users)
+        //public UnitOfWork(ICategoriesRepository categories, ITagsRepository tags, IOrdersRepository orders, IUsersRepository users, ICommentsRepository comments, IBonusesRepository bonuses, IProductsRepository products)
+        //{
+        //    Categories = categories;
+        //    Tags = tags;
+        //    Orders = orders;
+        //    Users = users;
+        //    Comments = comments;
+        //    Bonuses = bonuses;
+        //    Products = products;
+        //}
+        public UnitOfWork(IProductsRepository products,
+            IUsersRepository users,
+            ICategoriesRepository categories, 
+            ICategoriesPropertiesRepository categoriesProperties,
+            IPropertyValuesRepository propertyValues)
         {
             Products = products;
             Users = users;
+            Categories = categories;
+            CategoriesProperties = categoriesProperties;
+            PropertyValues = propertyValues;
         }
 
 
@@ -41,10 +48,10 @@ namespace Infrastructure.Repositories
 
         public IProductsRepository Products { get; }
 
-        public ICategoriesPropertiesRepository CategoriesProperties => throw new NotImplementedException();
+        public ICategoriesPropertiesRepository CategoriesProperties { get; }
 
         public IColorsRepository Colors => throw new NotImplementedException();
 
-        public IPropertyValues PropertyValues => throw new NotImplementedException();
+        public IPropertyValuesRepository PropertyValues { get; }
     }
 }

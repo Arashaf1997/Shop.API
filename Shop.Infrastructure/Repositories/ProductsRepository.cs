@@ -6,6 +6,8 @@ using Microsoft.Extensions.Configuration;
 using System.Data.SqlClient;
 using Dapper;
 using Shop.Application.Dtos.ProductDtos;
+using System.Data;
+using System.ComponentModel;
 
 namespace Infrastructure.Repositories
 {
@@ -17,6 +19,66 @@ namespace Infrastructure.Repositories
         {
             // Injecting Iconfiguration to the contructor of the product repository
             _configuration = configuration;
+        }
+
+        public async Task<int> Add(AddProductDto addProductDto)
+        {
+            using var connection = new SqlConnection(_configuration.GetConnectionString("DapperConnection"));
+            var sql = @"INSERT INTO dbo.Products(Title,Description,VisitCount,UserId,CategoryId,Status,InsertTime,EditTime) OUTPUT Inserted.Id
+                VALUES(@Title,@Description,0,@UserId,@CategoryId,@ProductStatus,GETDATE(),NULL)";
+            var insertedProductId = await connection.QueryAsync<int>(sql, new
+            {
+                Title = addProductDto.Title,
+                Description = addProductDto.Description,
+                UserId = 2,
+                CategoryId = addProductDto.CategoryId,
+                ProductStatus = addProductDto.ProductStatus
+            });
+
+            int productId = insertedProductId.FirstOrDefault();
+
+            if (addProductDto.UsageIds.Count > 0)
+            {
+                foreach (var usageId in addProductDto.UsageIds)
+                {
+                    sql = "INSERT INTO dbo.ProductsUsages(UsageId,ProductId,InsertTime,EditTime)VALUES(@UsageId, @ProductId , GETDATE(), NULL)";
+                    await connection.ExecuteAsync(sql, new
+                    {
+                        UsageId = usageId,
+                        ProductId = productId
+                    });
+                }
+            }
+            int res;
+            if (addProductDto.PropertyValueIds.Count > 0)
+            {
+                sql = "";
+                foreach (var propertyValueId in addProductDto.PropertyValueIds)
+                {
+                    if (sql == "")
+                        sql = $"INSERT INTO dbo.ProductsProperties(ProductId,PropertyValueId,InsertTime,EditTime)VALUES({productId},{propertyValueId},GETDATE(),NULL)";
+                    else
+                        sql = sql + "; \n " + $"INSERT INTO dbo.ProductsProperties(ProductId,PropertyValueId,InsertTime,EditTime)VALUES({productId},{propertyValueId},GETDATE(),NULL)";
+                }
+                res = await connection.ExecuteAsync(sql);
+            }
+
+            if (addProductDto.ProductColors.Count > 0)
+            {
+                sql = "";
+                foreach (var productColor in addProductDto.ProductColors)
+                {
+                    productColor.ProductId = productId;
+                    if (sql == "")
+                        sql = $"INSERT INTO dbo.ProductColors(ProductId,ColorId,Price,ColleaguePrice,IsExists,InsertTime,EditTime)VALUES({productId},{productColor.ColorId},{productColor.Price}, {productColor.ColleaguePrice},{Convert.ToInt32(productColor.IsExists)},GETDATE(),NULL)";
+                    else
+                        sql = sql + "; \n " + $"INSERT INTO dbo.ProductColors(ProductId,ColorId,Price,ColleaguePrice,IsExists,InsertTime,EditTime)VALUES({productId},{productColor.ColorId},{productColor.Price}, {productColor.ColleaguePrice},{Convert.ToInt32(productColor.IsExists)},GETDATE(),NULL)";
+                }
+                res = connection.Execute(sql);
+            }
+
+
+            return productId;
         }
 
         public async Task<int> AddAsync(Product entity)
@@ -201,7 +263,7 @@ GROUP BY p.Id,
                 return result;
             }
         }
-        
+
         public async Task<int> UpdateAsync(Product entity)
         {
             entity.EditTime = DateTime.Now;
@@ -214,5 +276,32 @@ GROUP BY p.Id,
             }
         }
 
+        public static DataTable ToDataTable<T>(List<T> iList)
+        {
+            DataTable dataTable = new DataTable();
+            PropertyDescriptorCollection propertyDescriptorCollection =
+                TypeDescriptor.GetProperties(typeof(T));
+            for (int i = 0; i < propertyDescriptorCollection.Count; i++)
+            {
+                PropertyDescriptor propertyDescriptor = propertyDescriptorCollection[i];
+                Type type = propertyDescriptor.PropertyType;
+
+                if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+                    type = Nullable.GetUnderlyingType(type);
+
+
+                dataTable.Columns.Add(propertyDescriptor.Name, type);
+            }
+            object[] values = new object[propertyDescriptorCollection.Count];
+            foreach (T iListItem in iList)
+            {
+                for (int i = 0; i < values.Length; i++)
+                {
+                    values[i] = propertyDescriptorCollection[i].GetValue(iListItem);
+                }
+                dataTable.Rows.Add(values);
+            }
+            return dataTable;
+        }
     }
 }

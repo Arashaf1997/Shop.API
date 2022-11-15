@@ -1,6 +1,7 @@
 ﻿using Dependencies.Models;
-using Shop.Application.Dtos.PorpertyValueDto;
 using Shop.Application.Dtos.ProductColorDto;
+using Shop.Application.Dtos.ProductPropertyDtos;
+using Shop.Application.Dtos.PropertyValueDtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,10 +16,9 @@ namespace Shop.Application.Dtos.ProductDtos
         public string Description { get; set; }
         public ProductStatuses ProductStatus  { get; set; }
         public int CategoryId { get; set; }
-        //public List<GetCategoryPropertyDto> Colors { get; set; }
-        public DateTime DiscountEndDate { get; set; }
         public List<int> UsageIds { get; set; } 
-        public List<AddPropertyValueDto> PropertyValues { get; set; }
+        public List<int> PropertyValueIds { get; set; }
+        public List<AddProductColorDto> ProductColors { get; set; }
     }
 
 }

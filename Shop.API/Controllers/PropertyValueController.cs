@@ -3,6 +3,7 @@ using Dependencies.Models;
 using Microsoft.AspNetCore.Mvc;
 using Shop.Application.Dtos.CategoryDtos;
 using Shop.Application.Dtos.ProductDtos;
+using Shop.Application.Dtos.PropertyValueDtos;
 
 namespace Shop.API.Controllers
 {
@@ -47,9 +48,9 @@ namespace Shop.API.Controllers
         /// <param name="product"></param>
         /// <returns>Status for creation</returns>
         [HttpPost]
-        public async Task<IActionResult> Add(Category product)
+        public async Task<IActionResult> Add(AddPropertyValueDto addPropertyValueDto)
         {
-            var data = await _unitOfWork.Categories.AddAsync(product);
+            var data = await _unitOfWork.PropertyValues.Add(addPropertyValueDto);
             return Ok(data);
         }
 
@@ -61,7 +62,7 @@ namespace Shop.API.Controllers
         [HttpDelete]
         public async Task<IActionResult> Delete(int id)
         {
-            var data = await _unitOfWork.Categories.DeleteAsync(id);
+            var data = await _unitOfWork.PropertyValues.DeleteAsync(id);
             return Ok(data);
         }
 
@@ -71,9 +72,9 @@ namespace Shop.API.Controllers
         /// <param name="product"></param>
         /// <returns>Status for update</returns>
         [HttpPut]
-        public async Task<IActionResult> Update(UpdateCategoryDto category)
+        public async Task<IActionResult> Update(UpdatePropertyValueDto updatePropertyValueDto)
         {
-            var data = await _unitOfWork.Categories.UpdateAsync(category);
+            var data = await _unitOfWork.PropertyValues.Update(updatePropertyValueDto);
             return Ok(data);
         }
     }

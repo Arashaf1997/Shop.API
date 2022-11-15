@@ -9,6 +9,9 @@ namespace Shop.API
         {
             service.AddTransient<IProductsRepository, ProductsRepository>();
             service.AddTransient<IUsersRepository, UsersRepository>();
+            service.AddTransient<ICategoriesRepository, CategoriesRepository>();
+            service.AddTransient<ICategoriesPropertiesRepository, CategoriesPropertiesRepository>();
+            service.AddTransient<IPropertyValuesRepository, PropertyValuesRepository>();
             service.AddTransient<IUnitOfWork, UnitOfWork>();
         }
     }
