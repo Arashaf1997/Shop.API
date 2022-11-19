@@ -9,14 +9,11 @@ namespace Dependencies.Models
         public FileContent()
         {
         }
-        public int DiscountPercent { get; set; }
-        public int Price { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
-        public string Description { get; set; }
-        public int UserId { get; set; }
-        public int ProductId { get; set; }
-        public int ProductColorId { get; set; }
-
+        public string GuidName { get; set; }
+        public string RealFileName { get; set; }
+        public int Length { get; set; }
+        public string MimeType { get; set; }
+        public string FileExtension { get; set; }
+        public string FilePath { get; set; }
     }
 }

@@ -9,5 +9,8 @@ namespace Shop.Application.Dtos.FileContentDtos
 {
     public class GetFileContentDto
     {
+        public Stream Stream { get; set; } 
+        public string FileName { get; set; }
+        public string MimeType { get; set; }
     }
 }

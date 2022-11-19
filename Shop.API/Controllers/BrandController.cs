@@ -48,7 +48,7 @@ namespace Shop.API.Controllers
         /// <param name="product"></param>
         /// <returns>Status for creation</returns>
         [HttpPost]
-        public async Task<IActionResult> Add(AddBrandDto addBrandDto)
+        public async Task<IActionResult> Add([FromQuery] AddBrandDto addBrandDto)
         {
             var data = await _unitOfWork.Brands.Add(addBrandDto);
             return Ok(data);

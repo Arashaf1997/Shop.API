@@ -74,23 +74,17 @@ namespace Infrastructure.Repositories
 
         public async Task<IReadOnlyList<GetBrandDto>> GetAllAsync()
         {
-            var sql = "SELECT Id,BrandName FROM dbo.Brands";
+            var sql = @"SELECT b.Id ,b.Title, CONCAT(f.FilePath,'\',f.GuidName) LogoPath FROM dbo.Brands b
+                        LEFT JOIN dbo.FileContent f ON b.LogoFileContentId = f.Id";
 
-            // Sing the Dapper Connection string we open a connection to the database
-            using (var connection = new SqlConnection(_configuration.GetConnectionString("DapperConnection")))
-            {
-                connection.Open();
-
-                // Pass the product object and the SQL statement into the Execute function (async)
-                var result = await connection.QueryAsync<GetBrandDto>(sql);
-                return result.ToList();
-            }
+            using var connection = new SqlConnection(_configuration.GetConnectionString("DapperConnection"));
+            var result = await connection.QueryAsync<GetBrandDto>(sql);
+            return result.ToList();
         }
 
         public async Task<int> Add(AddBrandDto addBrandDto)
         {
-            var sql = @$"INSERT INTO dbo.ProductBrands(BrandPercent,StartDate,EndDate,Description,UserId,ProductId,InsertTime,EditTime,Price,ProductColorId)VALUES
-                        (@BrandPercent, @StartDate, @EndDate, @Description, @UserId, @ProductId, GETDATE(), NULL , @Price, @ProductColorId)";
+            var sql = @$"INSERT INTO dbo.Brands(Title,LogoFileContentId,InsertTime,EditTime)VALUES(@Title,@LogoFileContentId,GETDATE(),NULL)";
 
             using var connection = new SqlConnection(_configuration.GetConnectionString("DapperConnection"));
             var result = await connection.ExecuteAsync(sql, addBrandDto);

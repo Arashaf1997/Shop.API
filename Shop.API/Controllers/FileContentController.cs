@@ -1,9 +1,11 @@
 using Application.Interfaces;
 using Dependencies.Models;
 using Microsoft.AspNetCore.Mvc;
+using Shop.Application;
 using Shop.Application.Dtos.CategoryDtos;
 using Shop.Application.Dtos.FileContentDtos;
 using Shop.Application.Dtos.ProductDtos;
+using static Infrastructure.Repositories.FileContentsRepository;
 
 namespace Shop.API.Controllers
 {
@@ -35,10 +37,11 @@ namespace Shop.API.Controllers
         /// <param name="id"></param>
         /// <returns>Category object</returns>
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetById(int id, ImageSizeType imageSize)
         {
-            var data = await _unitOfWork.FileContents.GetByIdAsync(id);
-            if (data == null) return Ok();
+            var data =  _unitOfWork.FileContents.GetById(id, imageSize);
+            if (data == null) 
+                return NotFound();
             return Ok(data);
         }
 

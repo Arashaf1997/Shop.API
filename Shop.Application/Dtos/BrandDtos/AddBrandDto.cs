@@ -11,7 +11,8 @@ namespace Shop.Application.Dtos.BrandDtos
 {
     public class AddBrandDto
     {
-       
+        public string Title { get; set; }
+        public int LogoFileContentId { get; set; }
     }
 
 }
