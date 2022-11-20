@@ -10,6 +10,7 @@ namespace Dependencies.Models
         }
         public int UserId { get; set; }
         public int ProductId { get; set; }
+        public int ReplyTo { get; set; }
         public string Text { get; set; }
     }
 }

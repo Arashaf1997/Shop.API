@@ -27,7 +27,8 @@ namespace Infrastructure.Repositories
             IPropertyValuesRepository propertyValues,
             IDiscountsRepository discounts,
             IBrandsRepository brands,
-            IFileContentsRepository fileContents)
+            IFileContentsRepository fileContents,
+            ICommentsRepository comments)
         {
             Products = products;
             Users = users;
@@ -37,6 +38,7 @@ namespace Infrastructure.Repositories
             Discounts = discounts;
             Brands = brands;
             FileContents = fileContents;
+            Comments = comments;
         }
 
 

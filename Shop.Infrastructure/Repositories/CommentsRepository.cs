@@ -1,8 +1,11 @@
 ﻿using Application.Interfaces;
+using Dapper;
 using Dependencies.Models;
 using Microsoft.Extensions.Configuration;
+using Shop.Application.Dtos.CommentDtos;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 
 namespace Infrastructure.Repositories
@@ -16,24 +19,45 @@ namespace Infrastructure.Repositories
             _configuration = configuration;
         }
 
-        public Task<int> AddAsync(Comment entity)
+        public async Task<int> Add(AddCommentDto addCommentDto)
+        {
+            string sql = "INSERT INTO dbo.Comments(UserId,ProductId,Text,InsertTime,EditTime,ReplyTo)VALUES(@UserId, @ProductId, @Text, GETDATE(), NULL , @ReplyTo)";
+            using var connection = new SqlConnection(_configuration.GetConnectionString("DapperConnection"));
+            var result = await connection.ExecuteAsync(sql, addCommentDto);
+            return result;
+        }
+
+        public async Task<int> AddAsync(Comment entity)
         {
             throw new NotImplementedException();
         }
-
-        public Task<int> DeleteAsync(int id)
+        public async Task<int> DeleteAsync(int id)
         {
-            throw new NotImplementedException();
+            string sql = "DELETE dbo.Comments WHERE (Id = @Id OR ReplyTo = @Id)";
+            using var connection = new SqlConnection(_configuration.GetConnectionString("DapperConnection"));
+            var result = await connection.ExecuteAsync(sql, new {Id = id});
+            return result;
         }
 
-        public Task<IReadOnlyList<Comment>> GetAllAsync()
+        public async Task<List<Comment>> GetAllByProductId(int productId)
         {
-            throw new NotImplementedException();
+            string sql = "SELECT Id,UserId,ProductId,Text,InsertTime,EditTime,ReplyTo FROM dbo.Comments WHERE ProductId = @ProductId";
+            using var connection = new SqlConnection(_configuration.GetConnectionString("DapperConnection"));
+            var result = await connection.QueryAsync<Comment>(sql,new { ProductId = productId });
+            return result.ToList();
         }
 
         public Task<Comment> GetByIdAsync(int id)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<int> Update(UpdateCommentDto updateCommentDto)
+        {
+            string sql = "UPDATE dbo.Comments SET Text = @Text , EditTime = GETDATE() WHERE Id = @Id";
+            using var connection = new SqlConnection(_configuration.GetConnectionString("DapperConnection"));
+            var result = await connection.ExecuteAsync(sql, updateCommentDto);
+            return result;
         }
 
         public Task<int> UpdateAsync(Comment entity)
