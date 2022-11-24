@@ -16,6 +16,7 @@ namespace Shop.API
             service.AddTransient<IBrandsRepository, BrandsRepository>();
             service.AddTransient<IFileContentsRepository, FileContentsRepository>();
             service.AddTransient<ICommentsRepository, CommentsRepository>();
+            service.AddTransient<IBlogRepository, BlogRepository>();
             service.AddTransient<IUnitOfWork, UnitOfWork>();
         }
     }

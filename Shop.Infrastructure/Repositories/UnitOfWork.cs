@@ -28,7 +28,8 @@ namespace Infrastructure.Repositories
             IDiscountsRepository discounts,
             IBrandsRepository brands,
             IFileContentsRepository fileContents,
-            ICommentsRepository comments)
+            ICommentsRepository comments,
+            IBlogRepository blog)
         {
             Products = products;
             Users = users;
@@ -39,6 +40,7 @@ namespace Infrastructure.Repositories
             Brands = brands;
             FileContents = fileContents;
             Comments = comments;
+            Blog = blog;
         }
 
 
@@ -55,6 +57,7 @@ namespace Infrastructure.Repositories
         public IDiscountsRepository Discounts { get; }
         public IFileContentsRepository FileContents { get; }
         public IBrandsRepository Brands { get; }
+        public IBlogRepository Blog { get; }
 
     }
 }

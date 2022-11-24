@@ -31,6 +31,7 @@ namespace Infrastructure.Repositories
         {
             throw new NotImplementedException();
         }
+
         public async Task<int> DeleteAsync(int id)
         {
             string sql = "DELETE dbo.Comments WHERE (Id = @Id OR ReplyTo = @Id)";

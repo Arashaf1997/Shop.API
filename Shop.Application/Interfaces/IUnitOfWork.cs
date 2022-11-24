@@ -17,5 +17,6 @@ namespace Application.Interfaces
         IDiscountsRepository Discounts { get; }
         IFileContentsRepository FileContents { get; }
         IBrandsRepository Brands { get; }
+        IBlogRepository Blog { get; }
     }
 }
