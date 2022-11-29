@@ -9,8 +9,9 @@ namespace Application.Interfaces
     public interface IUsersRepository : IGenericRepository<User>
     {
         //IQueryable<User> GetFilteredUsers(string searchText);
-        void Register(RegisterUserDto request);
+        bool Register(RegisterUserDto request);
         string Login(LoginUserDto request);
         string GetMe();
+        long SendTokenForPhoneRegister(string phoneNumber);
     }
 }

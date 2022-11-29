@@ -10,5 +10,7 @@ namespace Shop.Application.Dtos.UserDtos
     {
         public string Username { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
+        public bool IsEmailRegister { get; set; }
+        public int TokenKey { get; set; }
     }
 }

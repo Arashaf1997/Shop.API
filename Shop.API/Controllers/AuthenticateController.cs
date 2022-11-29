@@ -34,9 +34,19 @@ namespace JwtWebApiTutorial.Controllers
         [HttpPost("Register")]
         public async Task<ActionResult<User>> Register(RegisterUserDto request)
         {
-             _unitOfWork.Users.Register(request);
+            if (_unitOfWork.Users.Register(request))
+                return Ok(user);
+            else return NoContent();
+        }
 
-            return Ok(user);
+        [HttpPost("SendTokenForPhoneRegister")]
+        public async Task<ActionResult<User>> SendTokenForPhoneRegister(string phoneNumber)
+        {
+            var token = _unitOfWork.Users.SendTokenForPhoneRegister(phoneNumber);
+            if (token > 0)
+                return Ok(token);
+            else
+                return NoContent();
         }
 
         [HttpPost("login")]

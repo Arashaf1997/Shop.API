@@ -26,7 +26,7 @@ namespace Infrastructure.Repositories
             using var connection = new SqlConnection(_configuration.GetConnectionString("DapperConnection"));
             var sql = @"INSERT INTO dbo.Products(Title,Description,VisitCount,UserId,CategoryId,Status,InsertTime,EditTime) OUTPUT Inserted.Id
                 VALUES(@Title,@Description,0,@UserId,@CategoryId,@ProductStatus,GETDATE(),NULL)";
-            var insertedProductId = await connection.QueryAsync<int>(sql, new
+            var productId = await connection.QueryFirstOrDefaultAsync<int>(sql, new
             {
                 Title = addProductDto.Title,
                 Description = addProductDto.Description,
@@ -35,49 +35,65 @@ namespace Infrastructure.Repositories
                 ProductStatus = addProductDto.ProductStatus
             });
 
-            int productId = insertedProductId.FirstOrDefault();
-
-            if (addProductDto.UsageIds.Count > 0)
+            if (productId > 0)
             {
-                foreach (var usageId in addProductDto.UsageIds)
+                if (addProductDto.UsageIds.Count > 0)
                 {
-                    sql = "INSERT INTO dbo.ProductsUsages(UsageId,ProductId,InsertTime,EditTime)VALUES(@UsageId, @ProductId , GETDATE(), NULL)";
-                    await connection.ExecuteAsync(sql, new
+                    foreach (var usageId in addProductDto.UsageIds)
                     {
-                        UsageId = usageId,
-                        ProductId = productId
-                    });
+                        sql = "INSERT INTO dbo.ProductsUsages(UsageId,ProductId,InsertTime,EditTime)VALUES(@UsageId, @ProductId , GETDATE(), NULL)";
+                        await connection.ExecuteAsync(sql, new
+                        {
+                            UsageId = usageId,
+                            ProductId = productId
+                        });
+                    }
                 }
-            }
-            int res;
-            if (addProductDto.PropertyValueIds.Count > 0)
-            {
-                sql = "";
-                foreach (var propertyValueId in addProductDto.PropertyValueIds)
+                int res;
+                if (addProductDto.PropertyValueIds.Count > 0)
                 {
-                    if (sql == "")
-                        sql = $"INSERT INTO dbo.ProductsProperties(ProductId,PropertyValueId,InsertTime,EditTime)VALUES({productId},{propertyValueId},GETDATE(),NULL)";
-                    else
-                        sql = sql + "; \n " + $"INSERT INTO dbo.ProductsProperties(ProductId,PropertyValueId,InsertTime,EditTime)VALUES({productId},{propertyValueId},GETDATE(),NULL)";
+                    sql = "";
+                    foreach (var propertyValueId in addProductDto.PropertyValueIds)
+                    {
+                        if (sql == "")
+                            sql = $"INSERT INTO dbo.ProductsProperties(ProductId,PropertyValueId,InsertTime,EditTime)VALUES({productId},{propertyValueId},GETDATE(),NULL)";
+                        else
+                            sql = sql + "; \n " + $"INSERT INTO dbo.ProductsProperties(ProductId,PropertyValueId,InsertTime,EditTime)VALUES({productId},{propertyValueId},GETDATE(),NULL)";
+                    }
+                    res = await connection.ExecuteAsync(sql);
                 }
-                res = await connection.ExecuteAsync(sql);
-            }
 
-            if (addProductDto.ProductColors.Count > 0)
-            {
-                sql = "";
-                foreach (var productColor in addProductDto.ProductColors)
+                if (addProductDto.ProductColors.Count > 0)
                 {
-                    productColor.ProductId = productId;
-                    if (sql == "")
-                        sql = $"INSERT INTO dbo.ProductColors(ProductId,ColorId,Price,ColleaguePrice,IsExists,InsertTime,EditTime)VALUES({productId},{productColor.ColorId},{productColor.Price}, {productColor.ColleaguePrice},{Convert.ToInt32(productColor.IsExists)},GETDATE(),NULL)";
-                    else
-                        sql = sql + "; \n " + $"INSERT INTO dbo.ProductColors(ProductId,ColorId,Price,ColleaguePrice,IsExists,InsertTime,EditTime)VALUES({productId},{productColor.ColorId},{productColor.Price}, {productColor.ColleaguePrice},{Convert.ToInt32(productColor.IsExists)},GETDATE(),NULL)";
+                    sql = "";
+                    foreach (var productColor in addProductDto.ProductColors)
+                    {
+                        productColor.ProductId = productId;
+                        if (sql == "")
+                            sql = $"INSERT INTO dbo.ProductColors(ProductId,ColorId,Price,ColleaguePrice,IsExists,InsertTime,EditTime)VALUES({productId},{productColor.ColorId},{productColor.Price}, {productColor.ColleaguePrice},{Convert.ToInt32(productColor.IsExists)},GETDATE(),NULL)";
+                        else
+                            sql = sql + "; \n " + $"INSERT INTO dbo.ProductColors(ProductId,ColorId,Price,ColleaguePrice,IsExists,InsertTime,EditTime)VALUES({productId},{productColor.ColorId},{productColor.Price}, {productColor.ColleaguePrice},{Convert.ToInt32(productColor.IsExists)},GETDATE(),NULL)";
+                    }
+                    res = connection.Execute(sql);
                 }
-                res = connection.Execute(sql);
+                if (addProductDto.MainImageFileContentId > 0)
+                {
+                    sql = $"INSERT INTO dbo.ProductImages(ProductId,IsMainImage,FileContentId,InsertTime,EditTime)VALUES({productId},1,{addProductDto.MainImageFileContentId},GETDATE(),NULL)";
+                    res = connection.Execute(sql);
+                }
+                if (addProductDto.ProductImageFileContentIds.Count > 0)
+                {
+                    sql = "";
+                    foreach (var fileContentId in addProductDto.ProductImageFileContentIds)
+                    {
+                        if (sql == "")
+                            sql = $"INSERT INTO dbo.ProductImages(ProductId,IsMainImage,FileContentId,InsertTime,EditTime)VALUES({productId},0,{fileContentId},GETDATE(),NULL)";
+                        else
+                            sql = sql + "; \n " + $"INSERT INTO dbo.ProductImages(ProductId,IsMainImage,FileContentId,InsertTime,EditTime)VALUES({productId},0,{fileContentId},GETDATE(),NULL)";
+                    }
+                    res = connection.Execute(sql);
+                }
             }
-
-
             return productId;
         }
 
@@ -136,12 +152,15 @@ namespace Infrastructure.Repositories
        cat.Title CategoryName,
        ISNULL((SELECT SUM(od.Count) FROM dbo.OrderDetails od WHERE od.ProductId = p.Id AND EXISTS (SELECT 1 FROM dbo.Orders o WHERE od.OrderId = o.Id AND o.IsPaid = 1)),0) SellCount,
        ColorPrices.Colors,
-       ColorPrices.Price,
+	   ColorPrices.RealPrice,
+       ColorPrices.DiscountedPrice,
        --ColorPrices.ColleaguePrice,
        ColorPrices.DiscountPercent,
        ColorPrices.DiscountEndDate,
 	(SELECT AVG(bons.Stars) StarsAvg FROM dbo.Bonuses bons WHERE bons.ProductId = p.Id) Bonus,
 	 STRING_AGG(pu.UsageId,',') UsageIds,
+	 pi.Id MainImageId,
+	 fc.FilePath + '\' + fc.GuidName + '_2' ImageUrl,
        (
            SELECT catp.Title,
                   pv.Value
@@ -158,12 +177,15 @@ FROM dbo.Products p
     JOIN dbo.Categories cat
         ON p.CategoryId = cat.Id
 		LEFT JOIN dbo.ProductsUsages pu ON pu.ProductId = p.Id
+LEFT JOIN dbo.ProductImages pi ON pi.ProductId = p.Id AND pi.IsMainImage = 1
+LEFT JOIN dbo.FileContent fc ON pi.FileContentId = fc.Id
     CROSS APPLY
 (
     SELECT STRING_AGG(c.ColorName, ', ') Colors,
-           MIN(ISNULL(pd.Price, pc.Price)) Price,
+           MIN(ISNULL(pd.Price, pc.Price)) DiscountedPrice,
            MIN(pd.DiscountPercent) DiscountPercent,
-           MIN(pd.EndDate) DiscountEndDate
+           MIN(pd.EndDate) DiscountEndDate,
+		   MIN(pc.Price) RealPrice
     FROM dbo.ProductColors pc
         JOIN dbo.Colors c
             ON c.Id = pc.ColorId
@@ -182,11 +204,15 @@ GROUP BY p.Id,
          p.VisitCount,
          cat.Title,
          ColorPrices.Colors,
-         ColorPrices.Price,
+         ColorPrices.DiscountedPrice,
          --ColorPrices.ColleaguePrice,
          ColorPrices.DiscountPercent,
          ColorPrices.DiscountEndDate,
-         p.Status
+         p.Status,
+		 ColorPrices.RealPrice,
+		 pi.Id,
+		 fc.GuidName,
+		 fc.FilePath
 ORDER BY {order} OFFSET {pageSize * (pageNumber - 1)} ROWS FETCH NEXT {pageSize} ROWS ONLY; ";
             using (var connection = new SqlConnection(_configuration.GetConnectionString("DapperConnection")))
             {
