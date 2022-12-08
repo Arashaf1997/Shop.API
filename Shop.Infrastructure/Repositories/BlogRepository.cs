@@ -1,32 +1,32 @@
-﻿using Application.Interfaces;
-using Dapper;
+﻿using Dapper;
 using Dependencies.Models;
 using Microsoft.Extensions.Configuration;
 using Shop.Application.Dtos.CategoryDtos;
-using Shop.Application.Dtos.BrandDtos;
+using Shop.Application.Dtos.BlogDtos;
 using Shop.Application.Dtos.ProductDtos;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
+using Application.Interfaces;
 
 namespace Infrastructure.Repositories
 {
-    public class BrandsRepository : IBrandsRepository
+    public class BlogRepository : IBlogRepository
     {
         private readonly IConfiguration _configuration;
-        public BrandsRepository(IConfiguration configuration)
+        public BlogRepository(IConfiguration configuration)
         {
             // Injecting Iconfiguration to the contructor of the product repository
             _configuration = configuration;
         }
 
-        public async Task<int> AddAsync(Brand entity)
+        public async Task<int> AddAsync(Blog entity)
         {
             entity.InsertTime = DateTime.Now;
             entity.EditTime = null;
 
             // Basic SQL statement to insert a product into the products table
-            var sql = "INSERT INTO dbo.Brands (BrandName,InsertTime,EditTime) VALUES (@BrandName,@InsertTime,@EditTime)";
+            var sql = "INSERT INTO dbo.Blog (BlogName,InsertTime,EditTime) VALUES (@BlogName,@InsertTime,@EditTime)";
 
             // Sing the Dapper Connection string we open a connection to the database
             using (var connection = new SqlConnection(_configuration.GetConnectionString("DapperConnection")))
@@ -41,7 +41,7 @@ namespace Infrastructure.Repositories
 
         public async Task<int> DeleteAsync(int id)
         {
-            var sql = "DELETE FROM dbo.ProductBrands WHERE Id = @Id";
+            var sql = "DELETE FROM dbo.Blog WHERE Id = @Id";
             using (var connection = new SqlConnection(_configuration.GetConnectionString("DapperConnection")))
             {
                 connection.Open();
@@ -50,20 +50,20 @@ namespace Infrastructure.Repositories
             }
         }
 
-        public async Task<Brand> GetByIdAsync(int id)
+        public async Task<Blog> GetByIdAsync(int id)
         {
-            var sql = "SELECT * FROM dbo.ProductBrands WHERE Id = @Id";
+            var sql = "SELECT * FROM dbo.Blog WHERE Id = @Id";
             using (var connection = new SqlConnection(_configuration.GetConnectionString("DapperConnection")))
             {
                 connection.Open();
-                var result = await connection.QuerySingleOrDefaultAsync<Brand>(sql, new { Id = id });
+                var result = await connection.QuerySingleOrDefaultAsync<Blog>(sql, new { Id = id });
                 return result;
             }
         }
 
-        public async Task<int> UpdateAsync(Brand entity)
+        public async Task<int> UpdateAsync(Blog entity)
         {
-            var sql = "UPDATE dbo.ProductBrands SET BrandName = @BrandName, EditTime = GETDATE() WHERE Id = @Id";
+            var sql = "UPDATE dbo.ProductBlog SET BlogName = @BlogName, EditTime = GETDATE() WHERE Id = @Id";
             using (var connection = new SqlConnection(_configuration.GetConnectionString("DapperConnection")))
             {
                 connection.Open();
@@ -72,30 +72,29 @@ namespace Infrastructure.Repositories
             }
         }
 
-        public async Task<IReadOnlyList<GetBrandDto>> GetAllAsync()
+        public async Task<IReadOnlyList<GetBlogDto>> GetAllAsync()
         {
-            var sql = @"SELECT b.Id ,b.Title, CONCAT(f.FilePath,'\',f.GuidName) LogoPath FROM dbo.Brands b
-                        LEFT JOIN dbo.FileContent f ON b.LogoFileContentId = f.Id";
+            var sql = @"SELECT b.Id, b.Subject, b.Text, b.ImageFileContentId, b.InsertTime, b.EditTime FROM dbo.Blog b";
 
             using var connection = new SqlConnection(_configuration.GetConnectionString("DapperConnection"));
-            var result = await connection.QueryAsync<GetBrandDto>(sql);
+            var result = await connection.QueryAsync<GetBlogDto>(sql);
             return result.ToList();
         }
 
-        public async Task<int> Add(AddBrandDto addBrandDto)
+        public async Task<int> Add(AddBlogDto addBlogDto)
         {
-            var sql = @$"INSERT INTO dbo.Brands(Title,LogoFileContentId,InsertTime,EditTime)VALUES(@Title,@LogoFileContentId,GETDATE(),NULL)";
+            var sql = @$"INSERT INTO dbo.Blog(Subject,Text,ImageFileContentId,InsertTime,EditTime)VALUES(@Subject,@Text,@ImageFileContentId,GETDATE(),NULL)";
 
             using var connection = new SqlConnection(_configuration.GetConnectionString("DapperConnection"));
-            var result = await connection.ExecuteAsync(sql, addBrandDto);
+            var result = await connection.ExecuteAsync(sql, new { Subject = addBlogDto.Subject, Text = addBlogDto.Text, ImageFileContentId = addBlogDto.ImageFileContentId }) ;
             return result;
         }
 
-        public async Task<int> Update(UpdateBrandDto updateBrandDto)
+        public async Task<int> Update(UpdateBlogDto updateBlogDto)
         {
-            var sql = "UPDATE dbo.ProductBrands SET BrandPercent = @BrandPercent, Price = @Price, Description = @Description , StartDate = @StartDate, EndDate = @EndDate, EditTime = GETDATE() WHERE Id = @Id";
+            var sql = "UPDATE dbo.Blog SET Subject = @Subject , Text = @Text, ImageFileContentId = @ImageFileContentId ,EditTime = GETDATE() WHERE Id = @Id";
             using var connection = new SqlConnection(_configuration.GetConnectionString("DapperConnection"));
-            var result = await connection.ExecuteAsync(sql, updateBrandDto);
+            var result = await connection.ExecuteAsync(sql, updateBlogDto);
             return result;
         }
     }

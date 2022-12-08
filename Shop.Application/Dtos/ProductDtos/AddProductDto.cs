@@ -19,6 +19,8 @@ namespace Shop.Application.Dtos.ProductDtos
         public List<int> UsageIds { get; set; } 
         public List<int> PropertyValueIds { get; set; }
         public List<AddProductColorDto> ProductColors { get; set; }
+        public int MainImageFileContentId { get; set; }
+        public List<int> ProductImageFileContentIds { get; set; }
     }
 
 }

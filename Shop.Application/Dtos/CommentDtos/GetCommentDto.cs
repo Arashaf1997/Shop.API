@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Shop.Application.Dtos.BrandDtos
+namespace Shop.Application.Dtos.CommentDtos
 {
-    public class GetBrandDto
+    public class GetCommentDto
     {
         public int Id { get; }
         public string Title { get; }
