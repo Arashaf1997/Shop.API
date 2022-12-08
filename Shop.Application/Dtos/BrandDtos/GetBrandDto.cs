@@ -9,5 +9,7 @@ namespace Shop.Application.Dtos.BrandDtos
 {
     public class GetBrandDto
     {
+        int Id { get; set; }
+        string Title { get; set; } 
     }
 }

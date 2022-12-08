@@ -74,7 +74,7 @@ namespace Infrastructure.Repositories
 
         public async Task<IReadOnlyList<GetBrandDto>> GetAllAsync()
         {
-            var sql = "SELECT Id,BrandName FROM dbo.Brands";
+            var sql = "SELECT Id, Title [BrandName] FROM dbo.Brands";
 
             // Sing the Dapper Connection string we open a connection to the database
             using (var connection = new SqlConnection(_configuration.GetConnectionString("DapperConnection")))
