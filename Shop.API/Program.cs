@@ -1,6 +1,8 @@
+using Imageflow.Server;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Shop.API;
@@ -91,6 +93,15 @@ app.UseSwaggerUI(c =>
 }
 );
 
+app.UseImageflow(new ImageflowMiddlewareOptions()
+         .SetMapWebRoot(false)
+         .MapPath("/JooferFiles", "StaticFiles")
+         .SetAllowCaching(true));
+app.UseStaticFiles(new StaticFileOptions()
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(Directory.GetCurrentDirectory(), "StaticFiles"))
+});
 app.UseAuthentication();
 
 app.UseAuthorization();
