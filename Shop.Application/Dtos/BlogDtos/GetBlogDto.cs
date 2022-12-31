@@ -12,7 +12,9 @@ namespace Shop.Application.Dtos.BlogDtos
         public int Id { get; }
         public string Subject { get; }
         public string Text { get; }
-        public int ImageFileContentId { get; }
-
+        public string ImageUrl { get; }
+        public int UserId { get; }
+        public DateTime InsertTime { get; }
+        public DateTime EditTime { get; }
     }
 }

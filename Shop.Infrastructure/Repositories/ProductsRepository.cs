@@ -160,7 +160,7 @@ namespace Infrastructure.Repositories
 	(SELECT AVG(bons.Stars) StarsAvg FROM dbo.Bonuses bons WHERE bons.ProductId = p.Id) Bonus,
 	 STRING_AGG(pu.UsageId,',') UsageIds,
 	 pi.Id MainImageId,
-	 fc.FilePath + '\' + fc.GuidName + '_2' ImageUrl,
+	 fc.GuidName + '_2' + '.' + fc.FileExtension ImageUrl,
        (
            SELECT catp.Title,
                   pv.Value
@@ -212,7 +212,8 @@ GROUP BY p.Id,
 		 ColorPrices.RealPrice,
 		 pi.Id,
 		 fc.GuidName,
-		 fc.FilePath
+		 fc.FilePath,
+         fc.FileExtension
 ORDER BY {order} OFFSET {pageSize * (pageNumber - 1)} ROWS FETCH NEXT {pageSize} ROWS ONLY; ";
             using (var connection = new SqlConnection(_configuration.GetConnectionString("DapperConnection")))
             {
@@ -225,7 +226,7 @@ ORDER BY {order} OFFSET {pageSize * (pageNumber - 1)} ROWS FETCH NEXT {pageSize}
             }
         }
 
-        public async Task<Product> GetByIdAsync(int id)
+        public async Task<GetSingleProductDto> GetById(int id)
         {
             var sql = @"
 UPDATE dbo.Products SET VisitCount = VisitCount + 1 WHERE Id = @Id
@@ -233,25 +234,7 @@ UPDATE dbo.Products SET VisitCount = VisitCount + 1 WHERE Id = @Id
 SELECT p.Id ProductId,
        p.Title,
        p.Description,
-	   p.Status ProductStatus,
-       cat.Title CategoryName,
-	(SELECT AVG(bons.Stars) StarsAvg FROM dbo.Bonuses bons WHERE bons.ProductId = p.Id) Bonus,
-	 STRING_AGG(pu.UsageId, ',') UsageIds,
-	 (
-	 SELECT pc.Id ProductColorId,
-            pc.ProductId,
-            pc.ColorId,
-			pc.Price RealPrice,
-            ISNULL(pd.Price, pc.Price) DiscountedPrice,
-            pc.IsExists,
-			pd.DiscountPercent,
-			pd.EndDate DiscountEndDate
-			FROM dbo.ProductColors pc
-			LEFT JOIN dbo.ProductDiscounts pd ON pd.ProductColorId = pc.Id AND GETDATE() BETWEEN pd.StartDate AND pd.EndDate
-	 WHERE pc.ProductId = p.Id
-	 FOR JSON PATH
-	 ) ColorPrices,
-       (
+	   	   (
            SELECT catp.Title,
                   pv.Value
            FROM dbo.CategoriesProperties catp
@@ -260,32 +243,69 @@ SELECT p.Id ProductId,
                JOIN dbo.ProductsProperties pp
                    ON pp.ProductId = p.Id
                       AND pp.PropertyValueId = pv.Id
-           WHERE catp.CategoryId = cat.Id
+           WHERE catp.CategoryId = p.CategoryId
            FOR JSON PATH
        ) Props,
-	   (
-	   SELECT b.Stars,
-              COUNT(b.UserId) UsersCount
+	   p.Status ProductStatus,
+	 (
+	 SELECT pc.Id ProductColorId,
+            pc.ProductId,
+            pc.ColorId,
+			pc.Price RealPrice,
+            ISNULL(pd.Price, pc.Price) DiscountedPrice,
+			pd.DiscountPercent,
+			pd.EndDate DiscountEndDate,
+			pc.ColleaguePrice,
+            pc.IsExists
+			FROM dbo.ProductColors pc
+			LEFT JOIN dbo.ProductDiscounts pd ON pd.ProductColorId = pc.Id AND GETDATE() BETWEEN pd.StartDate AND pd.EndDate
+	 WHERE pc.ProductId = p.Id
+	 FOR JSON PATH
+	 ) ColorPrices,
+       (
+	   SELECT SUM(CASE WHEN b.Stars = 1 THEN 1 ELSE 0 END) OneStarCount,
+	   SUM(CASE WHEN b.Stars = 2 THEN 1 ELSE 0 END) TwoStarCount,
+	   SUM(CASE WHEN b.Stars = 3 THEN 1 ELSE 0 END) ThreeStarCount,
+	   SUM(CASE WHEN b.Stars = 4 THEN 1 ELSE 0 END) FourStarCount,
+	   SUM(CASE WHEN b.Stars = 5 THEN 1 ELSE 0 END) FiveStarCount,
+	   ROUND(AVG(CAST(b.Stars AS FLOAT)), 2) BonusAverage
 			  FROM dbo.Bonuses b WHERE b.ProductId = p.Id
-			  GROUP BY b.Stars
-			  FOR JSON PATH
-	   ) Bonuses
+			  FOR JSON PATH 
+	   ) Bonuses ,
+	 STRING_AGG(pu.UsageId, ',') UsageIds,
+	 STRING_AGG(usages.Title, ',') Usages,
+	 mainfc.GuidName + '.' + mainfc.FileExtension MainImageUrl,
+	 (
+	 select fc.GuidName + '.' + mainfc.FileExtension ImageUrl 
+	 from dbo.productImages pi 
+	 LEFT JOIN dbo.FileContent fc ON fc.Id = pi.FileContentId 
+	 WHERE pi.ProductId = p.Id AND pi.IsMainImage = 0
+	 FOR Json PATH
+	 ) ImageUrls,
+	 (
+	 SELECT TOP (5) Id, Text, UserId , InsertTime FROM dbo.Comments comment
+	 WHERE comment.ProductId = p.Id
+	 order By Id Desc
+	 FOR JSON PATH
+	  ) LastComments 
 FROM dbo.Products p
-    JOIN dbo.Categories cat
-        ON p.CategoryId = cat.Id
         LEFT JOIN dbo.ProductsUsages pu ON pu.ProductId = p.Id
+		LEFT JOIN dbo.Usages usages ON pu.UsageId = usages.Id
+		LEFT JOIN dbo.ProductImages mainpi ON p.Id = mainpi.ProductId  AND mainpi.IsMainImage = 1
+		left join dbo.FileContent mainfc ON mainpi.FileContentId = mainfc.Id 
 WHERE p.Id = @Id
 GROUP BY p.Id,
-         cat.Id,
          p.Title,
          p.Description,
          p.VisitCount,
-         cat.Title,
-         p.Status";
+         p.Status,
+		 mainfc.GuidName,
+		 mainfc.FileExtension,
+		 p.CategoryId";
             using (var connection = new SqlConnection(_configuration.GetConnectionString("DapperConnection")))
             {
                 connection.Open();
-                var result = await connection.QuerySingleOrDefaultAsync<Product>(sql, new { Id = id });
+                var result = await connection.QuerySingleOrDefaultAsync<GetSingleProductDto>(sql, new { Id = id });
                 return result;
             }
         }
@@ -328,6 +348,11 @@ GROUP BY p.Id,
                 dataTable.Rows.Add(values);
             }
             return dataTable;
+        }
+
+        public Task<Product> GetByIdAsync(int id)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -10,8 +10,9 @@ namespace Shop.Application.Dtos.CommentDtos
     public class GetCommentDto
     {
         public int Id { get; }
-        public string Title { get; }
-        public string LogoPath { get; }
+        public string Text { get; }
+        public string UserId { get; }
+        public DateTime InserTime { get; }
 
     }
 }

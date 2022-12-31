@@ -22,10 +22,10 @@ namespace Shop.API.Controllers
         /// This endpoint returns all products from the repository
         /// </summary>
         /// <returns>List of product objects</returns>
-        [HttpGet("GetAll")]
-        public async Task<IActionResult> GetAll()
+        [HttpGet("GetAllPaged")]
+        public async Task<IActionResult> GetAll(string order = "1 desc", int pageSize = 3, int pageNumber = 1)
         {
-            var data = await _unitOfWork.Blog.GetAllAsync();
+            var data = await _unitOfWork.Blog.GetAllPagedAsync(order,pageSize,pageNumber);
             return Ok(data);
         }
 

@@ -97,5 +97,16 @@ namespace Infrastructure.Repositories
             var result = await connection.ExecuteAsync(sql, updateBlogDto);
             return result;
         }
+
+        public async Task<List<GetBlogDto>> GetAllPagedAsync(string order , int pageSize , int pageNumber )
+        {
+            var sql = $@" SELECT b.Id, b.Subject, b.Text, fc.GuidName + '.' + fc.FileExtension ImageUrl,b.UserId, b.InsertTime, b.EditTime FROM dbo.Blog b
+		                LEFT JOIN dbo.FileContent fc ON b.ImageFileContentId = fc.Id
+                        ORDER BY {order} OFFSET {pageSize * (pageNumber - 1)} ROWS FETCH NEXT {pageSize} ROWS ONLY;";
+
+            using var connection = new SqlConnection(_configuration.GetConnectionString("DapperConnection"));
+            var result = await connection.QueryAsync<GetBlogDto>(sql);
+            return result.ToList();
+        }
     }
 }

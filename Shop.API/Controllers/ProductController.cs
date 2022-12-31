@@ -31,8 +31,8 @@ namespace Shop.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var data = await _unitOfWork.Products.GetByIdAsync(id);
-            if (data == null) return Ok();
+            var data = await _unitOfWork.Products.GetById(id);
+            if (data == null) return NotFound();
             return Ok(data);
         }
 
