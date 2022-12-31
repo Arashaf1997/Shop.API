@@ -67,18 +67,14 @@ namespace Infrastructure.Repositories
                     return null;
                 if (imageSize == ImageSizeType.Small)
                 {
-                    return System.IO.File.OpenRead(fileContent.FilePath + "\\" + fileContent.GuidName + "_2"); ;
+                    return System.IO.File.OpenRead(fileContent.FilePath + "\\" + fileContent.GuidName + "_2" + "." + fileContent.FileExtension); ;
                 }
                 if (imageSize == ImageSizeType.Medium)
                 {
-                    return System.IO.File.OpenRead(fileContent.FilePath + "\\" + fileContent.GuidName + "_1");
+                    return System.IO.File.OpenRead(fileContent.FilePath + "\\" + fileContent.GuidName + "_1" + "." + fileContent.FileExtension);
                 }
                 else
-                    return System.IO.File.OpenRead(fileContent.FilePath + "\\" + fileContent.GuidName);
-
-                //result.FileName = fileContent.RealFileName;
-                //result.MimeType = fileContent.MimeType;
-
+                    return System.IO.File.OpenRead(fileContent.FilePath + "\\" + fileContent.GuidName + "." + fileContent.FileExtension);
             }
             catch (Exception ex)
             {
@@ -114,7 +110,7 @@ namespace Infrastructure.Repositories
 
         public async Task<int> Add(AddFileContentDto addFileContentDto)
         {
-            string filePath = "C:\\JooferFiles";
+            string filePath = Directory.GetCurrentDirectory() + "\\StaticFiles";
             Guid guidName = Guid.NewGuid();
 
             var sql = @$"INSERT INTO dbo.FileContent(GuidName,RealFileName,Length,MimeType,FileExtension,FilePath,InsertTime,EditTime)
@@ -138,7 +134,7 @@ namespace Infrastructure.Repositories
                 {
                     if (!System.IO.Directory.Exists(filePath))
                         System.IO.Directory.CreateDirectory(filePath);
-                    string fullFileName = filePath + "\\" + guidName.ToString();
+                    string fullFileName = filePath + "\\" + guidName.ToString() + "." + fileExtension;
                     using (var stream = new FileStream(fullFileName, FileMode.Create))
                     {
                         addFileContentDto.form.CopyTo(stream);
@@ -148,10 +144,10 @@ namespace Infrastructure.Repositories
                     if (imageMimeTypes.Contains(addFileContentDto.form.ContentType))
                     {
                         ResizeImage(ImageSizeType.Medium, fullFileName
-                            , filePath + "\\" + guidName.ToString() + "_1", addFileContentDto.form.ContentType);
+                            , filePath + "\\" + guidName.ToString() + "_1" + "." + fileExtension, addFileContentDto.form.ContentType);
 
                         ResizeImage(ImageSizeType.Small, fullFileName
-                           , filePath + "\\" + guidName.ToString() + "_2", addFileContentDto.form.ContentType);
+                           , filePath + "\\" + guidName.ToString() + "_2" + "." + fileExtension, addFileContentDto.form.ContentType);
                     }
                     return result;
                 }

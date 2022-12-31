@@ -95,7 +95,7 @@ app.UseSwaggerUI(c =>
 
 app.UseImageflow(new ImageflowMiddlewareOptions()
          .SetMapWebRoot(false)
-         .MapPath("/JooferFiles", "StaticFiles")
+         .MapPath("/Files", "StaticFiles")
          .SetAllowCaching(true));
 app.UseStaticFiles(new StaticFileOptions()
 {
