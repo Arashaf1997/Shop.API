@@ -40,11 +40,12 @@ namespace Infrastructure.Repositories
             return result;
         }
 
-        public async Task<List<Comment>> GetAllByProductId(int productId)
+        public async Task<List<GetCommentDto>> GetAllByProductId(int productId, string order = "1 desc", int pageSize = 12, int pageNumber = 1)
         {
-            string sql = "SELECT Id,UserId,ProductId,Text,InsertTime,EditTime,ReplyTo FROM dbo.Comments WHERE ProductId = @ProductId";
+            string sql = @$"SELECT Id,UserId,ProductId,Text,InsertTime,EditTime,ReplyTo FROM dbo.Comments WHERE ProductId = @ProductId
+                            ORDER BY {order} OFFSET {pageSize * (pageNumber - 1)} ROWS FETCH NEXT {pageSize} ROWS ONLY;";
             using var connection = new SqlConnection(_configuration.GetConnectionString("DapperConnection"));
-            var result = await connection.QueryAsync<Comment>(sql,new { ProductId = productId });
+            var result = await connection.QueryAsync<GetCommentDto>(sql,new { ProductId = productId });
             return result.ToList();
         }
 

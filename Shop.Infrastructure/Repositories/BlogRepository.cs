@@ -83,10 +83,10 @@ namespace Infrastructure.Repositories
 
         public async Task<int> Add(AddBlogDto addBlogDto)
         {
-            var sql = @$"INSERT INTO dbo.Blog(Subject,Text,ImageFileContentId,InsertTime,EditTime)VALUES(@Subject,@Text,@ImageFileContentId,GETDATE(),NULL)";
+            var sql = @$"INSERT INTO dbo.Blog(Subject,Text,ImageFileContentId,CategoryId,InsertTime,EditTime)VALUES(@Subject,@Text,@ImageFileContentId,@CategoryId,GETDATE(),NULL)";
 
             using var connection = new SqlConnection(_configuration.GetConnectionString("DapperConnection"));
-            var result = await connection.ExecuteAsync(sql, new { Subject = addBlogDto.Subject, Text = addBlogDto.Text, ImageFileContentId = addBlogDto.ImageFileContentId }) ;
+            var result = await connection.ExecuteAsync(sql, new { Subject = addBlogDto.Subject, Text = addBlogDto.Text, ImageFileContentId = addBlogDto.ImageFileContentId, CategoryId = addBlogDto.CategoryId }) ;
             return result;
         }
 
@@ -98,10 +98,12 @@ namespace Infrastructure.Repositories
             return result;
         }
 
-        public async Task<List<GetBlogDto>> GetAllPagedAsync(string order , int pageSize , int pageNumber )
+        public async Task<List<GetBlogDto>> GetAllPagedAsync(string order , int pageSize , int pageNumber , int blogCategoryId = 0)
         {
-            var sql = $@" SELECT b.Id, b.Subject, b.Text, fc.GuidName + '.' + fc.FileExtension ImageUrl,b.UserId, b.InsertTime, b.EditTime FROM dbo.Blog b
+            var sql = $@" SELECT b.Id, b.Subject, b.Text, fc.GuidName + '.' + fc.FileExtension ImageUrl,b.UserId, b.InsertTime, b.EditTime, bc.Id BlogCategoryId, bc.Title BlogCategoryTitle FROM dbo.Blog b
+                        LEFT JOIN dbo.BlogsCategories bc ON bc.Id = b.CategoryId
 		                LEFT JOIN dbo.FileContent fc ON b.ImageFileContentId = fc.Id
+                        WHERE ({blogCategoryId} = 0 OR b.CategoryId = {blogCategoryId})
                         ORDER BY {order} OFFSET {pageSize * (pageNumber - 1)} ROWS FETCH NEXT {pageSize} ROWS ONLY;";
 
             using var connection = new SqlConnection(_configuration.GetConnectionString("DapperConnection"));

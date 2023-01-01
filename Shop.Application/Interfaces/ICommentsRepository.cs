@@ -11,7 +11,7 @@ namespace Application.Interfaces
         //void RemoveCommentsOfObject(int? productId, int? orderId);
         //void Set(Comment comment);
         //Dictionary<string, int> GetObjectComments(int objectId, bool isProduct);
-        Task<List<Comment>> GetAllByProductId(int productId);
+        Task<List<GetCommentDto>> GetAllByProductId(int productId, string order , int pageSize , int pageNumber );
         Task<int> Add(AddCommentDto addCommentDto);
         Task<int> Update(UpdateCommentDto updateCommentDto);
     }

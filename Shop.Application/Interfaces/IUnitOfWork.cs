@@ -18,5 +18,6 @@ namespace Application.Interfaces
         IFileContentsRepository FileContents { get; }
         IBrandsRepository Brands { get; }
         IBlogRepository Blog { get; }
+        IBlogCategoryRepository BlogCategory { get; }
     }
 }

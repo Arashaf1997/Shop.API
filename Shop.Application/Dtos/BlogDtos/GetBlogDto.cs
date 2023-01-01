@@ -16,5 +16,7 @@ namespace Shop.Application.Dtos.BlogDtos
         public int UserId { get; }
         public DateTime InsertTime { get; }
         public DateTime EditTime { get; }
+        public int BlogCategoryId { get; }
+        public string BlogCategoryTitle { get; }
     }
 }

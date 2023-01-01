@@ -4,15 +4,16 @@ using Microsoft.AspNetCore.Mvc;
 using Shop.Application.Dtos.CategoryDtos;
 using Shop.Application.Dtos.BlogDtos;
 using Shop.Application.Dtos.ProductDtos;
+using Shop.Application.Dtos.BlogCategoryDtos;
 
 namespace Shop.API.Controllers
 {
     [Route("api/[controller]")]
-    public class BlogController : ControllerBase
+    public class BlogCategoryController : ControllerBase
     {
         //Unit of work to give access to the repositories
         private readonly IUnitOfWork _unitOfWork;
-        public BlogController(IUnitOfWork unitOfWork)
+        public BlogCategoryController(IUnitOfWork unitOfWork)
         {
             // Inject Unit Of Work to the contructor of the product controller
             _unitOfWork = unitOfWork;
@@ -22,10 +23,10 @@ namespace Shop.API.Controllers
         /// This endpoint returns all products from the repository
         /// </summary>
         /// <returns>List of product objects</returns>
-        [HttpGet("GetAllPaged")]
-        public async Task<IActionResult> GetAll(string order = "1 desc", int pageSize = 3, int pageNumber = 1, int blogCategoryId = 0)
+        [HttpGet("GetAll")]
+        public async Task<IActionResult> GetAll()
         {
-            var data = await _unitOfWork.Blog.GetAllPagedAsync(order,pageSize,pageNumber,blogCategoryId);
+            var data = await _unitOfWork.BlogCategory.GetAllAsync();
             return Ok(data);
         }
 
@@ -37,8 +38,8 @@ namespace Shop.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var data = await _unitOfWork.Blog.GetByIdAsync(id);
-            if (data == null) return Ok();
+            var data = await _unitOfWork.BlogCategory.GetByIdAsync(id);
+            if (data == null) return NotFound();
             return Ok(data);
         }
 
@@ -48,9 +49,9 @@ namespace Shop.API.Controllers
         /// <param name="product"></param>
         /// <returns>Status for creation</returns>
         [HttpPost]
-        public async Task<IActionResult> Add(AddBlogDto addBlogDto)
+        public async Task<IActionResult> Add([FromQuery] AddBlogCategoryDto addBlogCategoryDto)
         {
-            var data = await _unitOfWork.Blog.Add(addBlogDto);
+            var data = await _unitOfWork.BlogCategory.Add(addBlogCategoryDto);
             return Ok(data);
         }
 
@@ -62,7 +63,7 @@ namespace Shop.API.Controllers
         [HttpDelete]
         public async Task<IActionResult> Delete(int id)
         {
-            var data = await _unitOfWork.Blog.DeleteAsync(id);
+            var data = await _unitOfWork.BlogCategory.DeleteAsync(id);
             return Ok(data);
         }
 
@@ -72,9 +73,9 @@ namespace Shop.API.Controllers
         /// <param name="product"></param>
         /// <returns>Status for update</returns>
         [HttpPut]
-        public async Task<IActionResult> Update(UpdateBlogDto updateBlogDto)
+        public async Task<IActionResult> Update(BlogCategory blogCategory)
         {
-            var data = await _unitOfWork.Blog.Update(updateBlogDto);
+            var data = await _unitOfWork.BlogCategory.UpdateAsync(blogCategory);
             return Ok(data);
         }
     }
