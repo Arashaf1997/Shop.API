@@ -30,7 +30,8 @@ namespace Infrastructure.Repositories
             IFileContentsRepository fileContents,
             ICommentsRepository comments,
             IBlogRepository blog,
-            IBlogCategoryRepository blogCategory)
+            IBlogCategoryRepository blogCategory,
+            ICartRepository cartRepository)
         {
             Products = products;
             Users = users;
@@ -43,6 +44,7 @@ namespace Infrastructure.Repositories
             Comments = comments;
             Blog = blog;
             BlogCategory = blogCategory;
+            Cart = cartRepository;
         }
 
 
@@ -61,6 +63,7 @@ namespace Infrastructure.Repositories
         public IBrandsRepository Brands { get; }
         public IBlogRepository Blog { get; }
         public IBlogCategoryRepository BlogCategory { get; }
+        public ICartRepository Cart { get; }
 
     }
 }

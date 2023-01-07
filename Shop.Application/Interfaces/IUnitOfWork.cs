@@ -19,5 +19,6 @@ namespace Application.Interfaces
         IBrandsRepository Brands { get; }
         IBlogRepository Blog { get; }
         IBlogCategoryRepository BlogCategory { get; }
+        ICartRepository Cart { get; }
     }
 }

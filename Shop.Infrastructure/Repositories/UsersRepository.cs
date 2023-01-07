@@ -52,7 +52,7 @@ namespace Infrastructure.Repositories
         public string Login(LoginUserDto request)
         {
             User user = new User();
-            var sql = $"SELECT PasswordHash,PasswordSalt FROM dbo.Users WHERE UserName = '{request.Username}' ";
+            var sql = $"SELECT PasswordHash,PasswordSalt FROM dbo.Users WHERE UserName = '{request.Username}' OR EmailAddress = '{request.Username}' OR PhoneNumber = '{request.Username}'";
 
             // Sing the Dapper Connection string we open a connection to the database
             using (var connection = new SqlConnection(_configuration.GetConnectionString("DapperConnection")))
