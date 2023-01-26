@@ -110,5 +110,7 @@ namespace Infrastructure.Repositories
             var result = await connection.QueryAsync<GetBlogDto>(sql);
             return result.ToList();
         }
+
+   
     }
 }
