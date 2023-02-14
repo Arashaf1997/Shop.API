@@ -215,15 +215,9 @@ GROUP BY p.Id,
 		 fc.FilePath,
          fc.FileExtension
 ORDER BY {order} OFFSET {pageSize * (pageNumber - 1)} ROWS FETCH NEXT {pageSize} ROWS ONLY; ";
-            using (var connection = new SqlConnection(_configuration.GetConnectionString("DapperConnection")))
-            {
-                connection.Open();
-
-                // Map all products from database to a list of type Product defined in Models.
-                // this is done by using Async method which is also used on the GetByIdAsync
-                var result = await connection.QueryAsync<GetProductDto>(sql);
-                return result.ToList();
-            }
+            using var connection = new SqlConnection(_configuration.GetConnectionString("DapperConnection"));
+            var result = await connection.QueryAsync<GetProductDto>(sql);
+            return result.ToList();
         }
 
         public async Task<GetSingleProductDto> GetById(int id)
@@ -353,6 +347,84 @@ GROUP BY p.Id,
         public Task<Product> GetByIdAsync(int id)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<IReadOnlyList<GetProductDto>> GetAllPagedForColleagueAsync(string order, int pageSize, int pageNumber)
+        {
+            var sql = @$"SELECT p.Id ProductId,
+       p.Title,
+       p.Description,
+       p.VisitCount,
+	   p.Status ProductStatus,
+       cat.Title CategoryName,
+       ISNULL((SELECT SUM(od.Count) FROM dbo.OrderDetails od WHERE od.ProductId = p.Id AND EXISTS (SELECT 1 FROM dbo.Orders o WHERE od.OrderId = o.Id AND o.IsPaid = 1)),0) SellCount,
+       ColorPrices.Colors,
+	   ColorPrices.RealPrice,
+       ColorPrices.DiscountedPrice,
+       ColorPrices.DiscountPercent,
+       ColorPrices.DiscountEndDate,
+	(SELECT AVG(bons.Stars) StarsAvg FROM dbo.Bonuses bons WHERE bons.ProductId = p.Id) Bonus,
+	 STRING_AGG(pu.UsageId,',') UsageIds,
+	 pi.Id MainImageId,
+	 fc.GuidName + '_2' + '.' + fc.FileExtension ImageUrl,
+       (
+           SELECT catp.Title,
+                  pv.Value
+           FROM dbo.CategoriesProperties catp
+               JOIN dbo.PropertiesValues pv
+                   ON pv.CategoryPropertyId = catp.Id
+               JOIN dbo.ProductsProperties pp
+                   ON pp.ProductId = p.Id
+                      AND pp.PropertyValueId = pv.Id
+           WHERE catp.CategoryId = cat.Id
+           FOR JSON PATH
+       ) Props,
+       ColorPrices.ColleaguePrice
+FROM dbo.Products p
+    JOIN dbo.Categories cat
+        ON p.CategoryId = cat.Id
+		LEFT JOIN dbo.ProductsUsages pu ON pu.ProductId = p.Id
+LEFT JOIN dbo.ProductImages pi ON pi.ProductId = p.Id AND pi.IsMainImage = 1
+LEFT JOIN dbo.FileContent fc ON pi.FileContentId = fc.Id
+    CROSS APPLY
+(
+    SELECT STRING_AGG(c.ColorName, ', ') Colors,
+           MIN(ISNULL(pd.Price, pc.Price)) DiscountedPrice,
+           MIN(pd.DiscountPercent) DiscountPercent,
+           MIN(pd.EndDate) DiscountEndDate,
+		   MIN(pc.Price) RealPrice
+    FROM dbo.ProductColors pc
+        JOIN dbo.Colors c
+            ON c.Id = pc.ColorId
+        LEFT JOIN dbo.ProductDiscounts pd
+            ON pd.ProductColorId = pc.Id
+               AND GETDATE()
+               BETWEEN pd.StartDate AND pd.EndDate
+			   AND pd.DiscountPercent > 0
+    WHERE pc.ProductId = p.Id
+          AND pc.IsExists = 1
+) AS ColorPrices
+GROUP BY p.Id,
+         cat.Id,
+         p.Title,
+         p.Description,
+         p.VisitCount,
+         cat.Title,
+         ColorPrices.Colors,
+         ColorPrices.DiscountedPrice,
+         ColorPrices.ColleaguePrice,
+         ColorPrices.DiscountPercent,
+         ColorPrices.DiscountEndDate,
+         p.Status,
+		 ColorPrices.RealPrice,
+		 pi.Id,
+		 fc.GuidName,
+		 fc.FilePath,
+         fc.FileExtension
+ORDER BY {order} OFFSET {pageSize * (pageNumber - 1)} ROWS FETCH NEXT {pageSize} ROWS ONLY; ";
+            using var connection = new SqlConnection(_configuration.GetConnectionString("DapperConnection"));
+            var result = await connection.QueryAsync<GetProductDto>(sql);
+            return result.ToList();
         }
     }
 }

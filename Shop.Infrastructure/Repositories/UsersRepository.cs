@@ -110,7 +110,7 @@ namespace Infrastructure.Repositories
         public long SendTokenForPhoneRegister(string phoneNumber)
         {
             using var con = new SqlConnection(_configuration.GetConnectionString("DapperConnection"));
-            var query = "SELECT IsActive FROM dbo.Users WHERE (UserName = @UserName OR PhoneNumber = @UserName)";
+            var query = "SELECT IsActive FROM dbo.Users WHERE (UserName = @UserName OR PhoneNumber = @UserName OR Email = @UserName)";
             var isExistsOrActive = con.QueryFirstOrDefault<bool?>(query, new { UserName = phoneNumber });
             if (isExistsOrActive == null)
             {
@@ -198,6 +198,28 @@ namespace Infrastructure.Repositories
                 result = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.Name);
             }
             return result;
+        }
+
+        public long InviteColleague(InviteColleagueUserDto dto)
+        {
+            using var connection = new SqlConnection(_configuration.GetConnectionString("DapperConnection"));
+            var query = "SELECT IsActive FROM dbo.Users WHERE (UserName = @UserName OR PhoneNumber = @UserName)";
+            var isExistsOrActive = connection.QueryFirstOrDefault<bool?>(query, new { UserName = dto.PhoneNumber });
+            if (isExistsOrActive == null)
+            {
+                Random random = new Random();
+                var randomToken = random.NextInt64(1111, 9999);
+                var sql = @"INSERT INTO dbo.Users (UserName,Password,Token,EmailAddress,PhoneNumber,InBlog,InsertTime,EditTime,PasswordHash,PasswordSalt,IsActive, Type)
+                            VALUES (@Username,NULL,@Token,NULL,@Username,0,GETDATE(),NULL,NULL,NULL, 0, 2)";
+                connection.Execute(sql, new { UserName = dto.PhoneNumber, Token = randomToken });
+
+                //TODO
+                //Send InviteLink to User With SMS or Email
+
+                return randomToken;
+            }
+            else
+                return 0;
         }
     }
 }

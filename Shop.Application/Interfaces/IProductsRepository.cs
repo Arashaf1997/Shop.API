@@ -11,6 +11,7 @@ namespace Application.Interfaces
 
         Task<int> Add(AddProductDto addProductDto);
         Task<GetSingleProductDto> GetById(int ProductId);
+        Task<IReadOnlyList<GetProductDto>> GetAllPagedForColleagueAsync(string order, int pageSize, int pageNumber);
 
         //IQueryable<Product> GetFilteredProducts(string searchText, int? categoryId, int? userId);
         //IQueryable<GetProductDto> GetProducts(int? categoryId, int? subCategoryId, int pageSize, int pageNo, string order);

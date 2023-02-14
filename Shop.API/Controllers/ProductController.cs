@@ -23,6 +23,13 @@ namespace Shop.API.Controllers
             return Ok(data);
         }
 
+        [HttpGet("GetAllPagedForColleague")]
+        public async Task<IActionResult> GetAllPagedForColleague(string order = "1 desc", int pageSize = 12, int pageNumber = 1)
+        {
+            var data = await _unitOfWork.Products.GetAllPagedForColleagueAsync(order, pageSize, pageNumber);
+            return Ok(data);
+        }
+
         /// <summary>
         /// This endpoint returns a single product by ID
         /// </summary>

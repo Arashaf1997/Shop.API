@@ -49,6 +49,16 @@ namespace Shop.API.Controllers
             return Ok(data);
         }
 
+        [HttpPost("InviteColleague")]
+        public async Task<IActionResult> InviteColleague(InviteColleagueUserDto dto)
+        {
+            var data = _unitOfWork.Users.InviteColleague(dto);
+            if (data != 0)
+                return Ok(data);
+            else
+                return BadRequest("User already exists");
+        }
+
         /// <summary>
         /// This endpont deletes a user form the database by ID
         /// </summary>

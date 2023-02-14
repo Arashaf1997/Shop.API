@@ -13,5 +13,6 @@ namespace Application.Interfaces
         string Login(LoginUserDto request);
         string GetMe();
         long SendTokenForPhoneRegister(string phoneNumber);
+        long InviteColleague(InviteColleagueUserDto dto);
     }
 }
